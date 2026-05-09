@@ -52,23 +52,23 @@ def run_agent(question:str):
             print(f"\n Final Answer: {ai_message.content}")
             return ai_message.content
     
-    #Process only the first tool call -force one tool per iteration
-    tool_call = tool_calls[0]
-    tool_name = tool_call.get("name")
-    tool_args = tool_call.get("args",{})
-    tool_call_id = tool_call.get("id")
-    print(f"[Tool Selected] {tool_name} with args: {tool_args}")
+        #Process only the first tool call -force one tool per iteration
+        tool_call = tool_calls[0]
+        tool_name = tool_call.get("name")
+        tool_args = tool_call.get("args",{})
+        tool_call_id = tool_call.get("id")
+        print(f"[Tool Selected] {tool_name} with args: {tool_args}")
 
-    tool_to_use = tools_dict.get(tool_name)
+        tool_to_use = tools_dict.get(tool_name)
 
-    if tool_to_use is None:
-        return ValueError(f"Tool '{tool_name}' not found")
-    
-    observation = tool_to_use.invoke(tool_args)
-    print(f"[Tool Result] {observation}")
+        if tool_to_use is None:
+            return ValueError(f"Tool '{tool_name}' not found")
+        
+        observation = tool_to_use.invoke(tool_args)
+        print(f"[Tool Result] {observation}")
 
-    messages.append(ai_message)
-    messages.append(ToolMessage(content=str(observation), tool_call_id=tool_call_id))
+        messages.append(ai_message)
+        messages.append(ToolMessage(content=str(observation), tool_call_id=tool_call_id))
 
     print("Error: Max iterations reached without a final answer")
     return None

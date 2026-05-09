@@ -104,23 +104,23 @@ def run_agent(question:str):
             print(f"\n Final Answer: {ai_message.content}")
             return ai_message.content
     
-    #Process only the first tool call -force one tool per iteration
-    tool_call = tool_calls[0]
-    tool_name = tool_call.function.name
-    tool_args = tool_call.function.arguments
-   
-    print(f"[Tool Selected] {tool_name} with args: {tool_args}")
-
-    tool_to_use = tools_dict.get(tool_name)
-
-    if tool_to_use is None:
-        return ValueError(f"Tool '{tool_name}' not found")
+        #Process only the first tool call -force one tool per iteration
+        tool_call = tool_calls[0]
+        tool_name = tool_call.function.name
+        tool_args = tool_call.function.arguments
     
-    observation = tool_to_use(**tool_args)
-    print(f"[Tool Result] {observation}")
+        print(f"[Tool Selected] {tool_name} with args: {tool_args}")
 
-    messages.append(ai_message)
-    messages.append({"role":"tool","content":str(observation)})
+        tool_to_use = tools_dict.get(tool_name)
+
+        if tool_to_use is None:
+            return ValueError(f"Tool '{tool_name}' not found")
+        
+        observation = tool_to_use(**tool_args)
+        print(f"[Tool Result] {observation}")
+
+        messages.append(ai_message)
+        messages.append({"role":"tool","content":str(observation)})
 
     
     return None
