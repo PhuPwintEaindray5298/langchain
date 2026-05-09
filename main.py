@@ -2,12 +2,28 @@ from dotenv import load_dotenv
 import os
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain_core.messages import HumanMessage
+from langchain.tools import tool
+from tavily import TavilyClient
+
+
 load_dotenv()
 
+tavily = TavilyClient()
+@tool
+def search(query: str) -> str:
+    """
+    Tool that searches over internet.
+    Args:
+        query: The query to search for
+    Returns:
+        The search result
+    """
+    print(f"Searching for {query}")
+    return tavily.search(query=query)
 
-
-def main():
-    print("Hello from langchain-course!")
+def langchain_introduce(llm: ChatOpenAI) -> str:
     information = """
         Elon Reeve Musk (/ˈiːlɒn/ EE-lon; born June 28, 1971) is a businessman and entrepreneur known for his leadership of Tesla, SpaceX, X, and xAI. 
         Musk has been the wealthiest person in the world since 2025; as of May 2026, Forbes estimates his net worth to be US$788 billion.
@@ -26,11 +42,18 @@ def main():
     """
 
     summary_prompt_template = PromptTemplate(input_variables=["information"],template=summary_template)
-
-    llm = ChatOpenAI(temperature=0, model="gpt-5")
     chain = summary_prompt_template | llm
     response = chain.invoke(input={"information":information})
     print(response.content)
+
+def main():
+    print("Hello from langchain-course!")
+    
+    llm = ChatOpenAI(temperature=0, model="gpt-5")
+    tools = [search]
+    agent = create_agent(model=llm,tools=tools)
+    result = agent.invoke({"messages":HumanMessage(content="What is the weather in Tokyo?")})
+    print(result)
 
 if __name__ == "__main__":
     main()
