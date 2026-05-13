@@ -9,6 +9,7 @@ from tavily import TavilyClient
 from typing import List
 from pydantic import BaseModel, Field
 
+
 load_dotenv()
 
 class Source(BaseModel):
