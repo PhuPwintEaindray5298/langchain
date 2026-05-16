@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "asyncio>=4.0.0",
+    "beautifulsoup4>=4.14.3",
     "black>=26.3.1",
     "isort>=8.0.1",
     "langchain>=1.2.18",
@@ -19,6 +20,7 @@ dependencies = [
     "langchainhub>=0.1.21",
     "onnxruntime==1.18.0",
     "pydantic>=2.13.4",
+    "pytest>=9.0.3",
     "python-dotenv>=1.2.2",
     "streamlit>=1.57.0",
     "tavily-python>=0.7.24",
