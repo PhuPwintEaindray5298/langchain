@@ -16,10 +16,10 @@ embeddings = OpenAIEmbeddings()
 llm = ChatOpenAI()
 
 vectorstore = PineconeVectorStore(
-    index_name= os.environ["INDEX_NAME"], embedding=embeddings
+    index_name=os.environ["INDEX_NAME"], embedding=embeddings
 )
 
-retriever =vectorstore.as_retriever(search_kwargs={"k":3})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 prompt_template = ChatPromptTemplate.from_template(
     """Answer the question based only on the following context:
@@ -29,7 +29,8 @@ prompt_template = ChatPromptTemplate.from_template(
 """
 )
 
-def retrieval_chain_without_langchainExpressionLanguage(query:str):
+
+def retrieval_chain_without_langchainExpressionLanguage(query: str):
     """
     Simple retrieval chain without LCEL.
     Manually retrieves documents, formats them, and generates a response.
@@ -40,16 +41,17 @@ def retrieval_chain_without_langchainExpressionLanguage(query:str):
     - Harder to compose with other chains
     - More verbose and error-prone
     """
-    #Step1: Retrieve relevant documents
+    # Step1: Retrieve relevant documents
     docs = retriever.invoke(query)
-    #Step2: Format documents into context string
+    # Step2: Format documents into context string
     context = format_docs(docs=docs)
-    #Step3: Format the prompt with context and question
-    messages = prompt_template.format_messages(context=context,question=query)
-    #Step4: Invoke LLM with the formatted messages
+    # Step3: Format the prompt with context and question
+    messages = prompt_template.format_messages(context=context, question=query)
+    # Step4: Invoke LLM with the formatted messages
     response = llm.invoke(messages)
-    #Step5: Return the content
+    # Step5: Return the content
     return response.content
+
 
 def retrieval_chain_with_langchain():
     """
@@ -67,7 +69,7 @@ def retrieval_chain_with_langchain():
     - Better debugging: LangChain provides better observability tools
     """
 
-    #RunnablePassthrought -> the input for running this chain is unchange and going to be the original input
+    # RunnablePassthrought -> the input for running this chain is unchange and going to be the original input
     retrieval_chain = (
         RunnablePassthrough.assign(
             context=itemgetter("question") | retriever | format_docs
@@ -79,19 +81,19 @@ def retrieval_chain_with_langchain():
     return retrieval_chain
 
 
-
 def format_docs(docs):
     """Format retrieved documents into a single string."""
     return "\n\n".join(doc.page_content for doc in docs)
+
 
 if __name__ == "__main__":
     print("Retrieving.....")
 
     query = "What is Pinecone in machine learning"
 
-    #==================================================
-    #Option 0: Raw Invocation without RAG
-    #==================================================
+    # ==================================================
+    # Option 0: Raw Invocation without RAG
+    # ==================================================
     print("\n" + "=" * 70)
     print("IMPLEMENTATION 0: Raw LLM Invocation (No RAG)")
     print("=" * 70)
@@ -99,19 +101,21 @@ if __name__ == "__main__":
     print("\nAnswer:")
     print(result_raw.content)
 
-    #==================================================
-    #Option 1: Use Implementation without LCEL
-    #==================================================
+    # ==================================================
+    # Option 1: Use Implementation without LCEL
+    # ==================================================
     print("\n" + "=" * 70)
     print("IMPLEMENTATION 1: without Langchain Expression Language")
     print("=" * 70)
-    result_without_lcel = retrieval_chain_without_langchainExpressionLanguage(query=query)
+    result_without_lcel = retrieval_chain_without_langchainExpressionLanguage(
+        query=query
+    )
     print("\nAnswer")
     print(result_without_lcel)
 
-     #==================================================
-    #Option 1: Use Implementation with LCEL
-    #==================================================
+    # ==================================================
+    # Option 1: Use Implementation with LCEL
+    # ==================================================
     print("\n" + "=" * 70)
     print("IMPLEMENTATION 2: With LCEL - Better Approach")
     print("=" * 70)
@@ -124,6 +128,6 @@ if __name__ == "__main__":
     print("=" * 70)
 
     chain_with_lcel = retrieval_chain_with_langchain()
-    result_with_lcel = chain_with_lcel.invoke({"question":query})
+    result_with_lcel = chain_with_lcel.invoke({"question": query})
     print("\nAnswer")
     print(result_with_lcel)

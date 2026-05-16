@@ -9,20 +9,27 @@ from tavily import TavilyClient
 from typing import List
 from pydantic import BaseModel, Field
 
-
 load_dotenv()
 
+
 class Source(BaseModel):
-    """ Schema for a source used by the agent
-    """
-    url:str = Field(description="The URL of the source")
+    """Schema for a source used by the agent"""
+
+    url: str = Field(description="The URL of the source")
+
 
 class AgentResponse(BaseModel):
     """Schema for agent response with answer and sources"""
-    answer:str = Field(description="The agent's answer for the query")
-    sources:List[Source] = Field(default_factory=list, description="List of sources used to generate the answer")
+
+    answer: str = Field(description="The agent's answer for the query")
+    sources: List[Source] = Field(
+        default_factory=list, description="List of sources used to generate the answer"
+    )
+
 
 tavily = TavilyClient()
+
+
 @tool
 def search(query: str) -> str:
     """
@@ -34,6 +41,7 @@ def search(query: str) -> str:
     """
     print(f"Searching for {query}")
     return tavily.search(query=query)
+
 
 def langchain_introduce(llm: ChatOpenAI) -> str:
     information = """
@@ -53,19 +61,25 @@ def langchain_introduce(llm: ChatOpenAI) -> str:
     2. two interesting facts about them
     """
 
-    summary_prompt_template = PromptTemplate(input_variables=["information"],template=summary_template)
+    summary_prompt_template = PromptTemplate(
+        input_variables=["information"], template=summary_template
+    )
     chain = summary_prompt_template | llm
-    response = chain.invoke(input={"information":information})
+    response = chain.invoke(input={"information": information})
     print(response.content)
+
 
 def main():
     print("Hello from langchain-course!")
-    
+
     llm = ChatOpenAI(temperature=0, model="gpt-5")
     tools = [search]
-    agent = create_agent(model=llm,tools=tools,response_format=AgentResponse)
-    result = agent.invoke({"messages":HumanMessage(content="What is the weather in Tokyo?")})
+    agent = create_agent(model=llm, tools=tools, response_format=AgentResponse)
+    result = agent.invoke(
+        {"messages": HumanMessage(content="What is the weather in Tokyo?")}
+    )
     print(result)
+
 
 if __name__ == "__main__":
     main()

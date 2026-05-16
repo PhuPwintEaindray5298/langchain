@@ -1,4 +1,3 @@
-
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, StateGraph
@@ -9,38 +8,43 @@ from reflectionChain import generationChain, reflectionChain
 class MessageGraph(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
+
 REFLECT = "reflect"
 GENERATE = "generate"
 
+
 def generation_node(state: MessageGraph):
-    return {"messages": [generationChain.invoke({"messages":state["messages"]})]} 
+    return {"messages": [generationChain.invoke({"messages": state["messages"]})]}
 
-def reflection_node(state:MessageGraph):
-    res = reflectionChain.invoke({"messages":state["messages"]})
-    return {"messages":[HumanMessage(content = res.content)]}
 
-builder = StateGraph(state_schema = MessageGraph)
-builder.add_node(GENERATE,generation_node)
-builder.add_node(REFLECT,reflectionChain)
+def reflection_node(state: MessageGraph):
+    res = reflectionChain.invoke({"messages": state["messages"]})
+    return {"messages": [HumanMessage(content=res.content)]}
+
+
+builder = StateGraph(state_schema=MessageGraph)
+builder.add_node(GENERATE, generation_node)
+builder.add_node(REFLECT, reflectionChain)
 builder.set_entry_point(GENERATE)
 
-def should_continue(state:MessageGraph):
+
+def should_continue(state: MessageGraph):
     if len(state["messages"]) > 6:
         return END
     return REFLECT
 
-builder.add_conditional_edges(GENERATE,should_continue, path_map = {END:END,REFLECT:REFLECT})
-builder.add_edge(REFLECT,GENERATE)
+
+builder.add_conditional_edges(
+    GENERATE, should_continue, path_map={END: END, REFLECT: REFLECT}
+)
+builder.add_edge(REFLECT, GENERATE)
 
 graph = builder.compile()
 print(graph.get_graph().draw_mermaid())
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("Hello LangGraph")
-    inputs = {
-        "messages": [
-            HumanMessage(
-                content="""Make this tweet better:"
+    inputs = {"messages": [HumanMessage(content="""Make this tweet better:"
                                     @LangChainAI
             — newly Tool Calling feature is seriously underrated.
 
@@ -48,9 +52,6 @@ if __name__ == '__main__':
 
             Made a video covering their newest blog post
 
-                                  """
-            )
-        ]
-    }
+                                  """)]}
     response = graph.invoke(inputs)
     print(response)
