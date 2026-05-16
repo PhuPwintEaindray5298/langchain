@@ -49,7 +49,9 @@ if prompt:
         try:
             with st.spinner("Retrieving docs and generating answer…"):
                 result: Dict[str, Any] = run_llm(prompt)
-                answer = str(result.get("answer", "")).strip() or "(No answer returned.)"
+                answer = (
+                    str(result.get("answer", "")).strip() or "(No answer returned.)"
+                )
                 sources = _format_sources(result.get("context", []))
 
             st.markdown(answer)
